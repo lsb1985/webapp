@@ -67,4 +67,26 @@ def select(sql,args,size=None):
 		yield from cur.close()
 		logging.info('rows return:%s' %len(rs))	
 		return rs
+		
+
+#---------------------------------
+#function:execute:insert,update,delete
+#input:sql,args
+#output:retrun affected rowcount
+#history
+#	20150718	init
+#---------------------------------
+@asyncio.coroutine
+def execute(sql,args):
+	log(sql)
+	global __pool
+	with (yield from __pool) as conn:
+		try:
+			cur=yield from conn.cursor()
+			yield from cur.execute(sql.replace('?','%s'),args)
+			affected=cur.rowcount
+			yield from cur.close()
+		except BaseException, e:
+			raise
+		return affected
 
